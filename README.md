@@ -77,3 +77,85 @@ let guess: u32 = guess.trim().parse().expect("Please type a number!"); // note t
 ```
 - A `match` expr is comprised of "arms", each arm has a pattern to match against and the code to run if matched
   - expr ends after first successful match
+
+## Common Programming Concepts: Rust Edition (ch. 3)
+### Variables
+- Variables are immutable by default, add `mut` in front of var to make it mutable => `let mut x = 123;`
+  - Can't use `mut` with constants => `const x = 5;`
+  - Constants can only be set to a constant expression, not a result from a value at runtime `const SOME_CONST: u32 = 14`
+- Shadowing variables is allowed, and encouraged for transforming types, mutating in inner scopes.
+  - use `let variable = "some new value"` to declare a new variable with the same name for transformations, while keeping
+    the "original" variable immutable
+    - using `mut` instead will not allow you to change the type, and actually mutates the value
+  - "Shadowed" value is used by compiler until scope ends or a new shadowing overrides it
+
+### Data Types
+- Rust is a statically typed langauge => `some_var: u32 = //...` for type annotations (here, unsigned 32 bit integer)
+- Scalar type represents a single value. Rust has four primary scalar types:
+  - Integer
+  - Floating-point number
+  - Booleans
+  - Characters
+
+Integer Type: Number without a fractional component
+  - signed int types start with `i` instead of `u` (signed means it's possible for the int to have a negative value)
+  - the num like `u32` refers to the number of bits of storage it uses
+  - can use `_` as a visual separator => `10_000` equals `10000`
+  - If value exceeds typed range => Integer Overflow
+    - Int overflow results in panic in debug mode, but wrapping in release mode (should be handled, reliance is considered an error)
+
+Floating-Point Types
+- Two types => `f32` and `f64`, refers to bits of size for each float
+  - `f32` is single precision
+  - `f64` is double precision
+- All floats are signed
+
+Numeric Operations
+ - `+`, `-`, `*`, `/` (division), `%` (remainder) all operate as expected and evaluate to a single value that is bound to a variable
+
+
+Boolean Type
+- `true` and `false`, 1 byte in size
+- e.g. `let f: bool = false;`
+
+Character Type `char`
+- Rusts' must primitive alphabetic type, four bytes in size (a unicode scalar value)
+- Use `' '` single quotes (compared to string literals which use `" "` double quotes)
+- e.g. `let my_string: char = 'abc';`
+
+#### Compound Types: Two primitive compound types: Tuples and Arrays
+- Group multiple values into a single type
+
+Tuple Type
+  - Group a variety of types into one compound type
+  - Fixed length
+  - Create using a comma separated list of values in parenthesis e.g.
+  - a "unit" is a tuple without any values, written as `()` to represent an empty value or return type
+  ```rust
+  fn main() {
+      let tup: (i32, f64, u8) = (100, 6.9, 9)
+
+      // can be destructured using pattern matching
+      let (x, y, z) = tup
+      println!({y}) => 6.9
+
+      // or zero-based index access
+      let nine = tup.2 // => 9
+  }
+  ```
+
+Array Type
+- Unlike a tuple, every element of an array must have the same type
+- Fixed length (use a Vector type instead for collection that can grow or shrink in size)
+- Used for data to allocated to stack rather than heap
+- Value accessed by index in brackets `let first = a[0]`
+- A value for an index out of the defined bounds will cause panic at runtime (memory safety)
+
+```rust
+fn main() {
+    let a: [i32; 3] = [1,2,3]; //  3 element array of i32 ints
+    let b = [3; 5]; // 3 element array, each with the value 5 => [5, 5, 5]
+}
+```
+
+### Functions
