@@ -28,7 +28,7 @@ Notes taken from following along [The Rust Book](https://doc.rust-lang.org/book/
 ## Style basics
 - `rustfmt` is a formatting tool
 - indent with four spaces
--
+- snake_case as conventional style for function and variable names
 
 ## Variable basics
 - It is common to shadow existing variable names when converting type to reuse the variable name
@@ -52,7 +52,7 @@ let guess: u32 = guess.trim().parse().expect("Please type a number!"); // note t
 ## General
 - `use std::io;` to import libraries (called the prelude)
 - variables are immutable by default, use `mut` before the variable name
-- `//` for comments
+- `//` for comments, use `//` for each line of multi-line comments
 - In `String::new()`, `::` refers to an associated function of the string type that makes a new value (a growable UTF-8 string)
 - `.read_line(&mut guess)` => `&` means the argument is a reference (immutable by default)
 - `Result` values are an enum that can have multiple variants: `Ok` and `Err`. Errors are handled by calling the `expect` method on the result type, if it has an error it gets handled here, otherwise returns the value that `Ok` is holding
@@ -159,3 +159,36 @@ fn main() {
 ```
 
 ### Functions
+- `fn main() {}` => entrypoint to most rust apps
+- `fn` keyword to declare new functions
+- Rust doesn't care about order that functions are defined, only that they're in scope
+- **Must** declare type of each parameter
+- Func return values are not named, but must be declared after an arrow `->`
+
+### Statements and Expresssions
+Function bodies are comprised of a series of statements optionally ending in an expr
+- **Statements**: Instructions that perform some action and do not return a value
+  - e.g. creating and assigning a var, func definitions
+- **Expressions**: Evaluate to a resultant value
+  - e.g. calling a func or a macro, a new scope block using `{}`
+  - expressions **do not** include ending semicolons
+    - putting an ending semicolon at the end of an expr transforms it into a statement (no return value)
+
+### Control Flow
+- `if ` and loops are the most common control flows
+- `if` expr
+  - Blocks of code associated with the conditions are called *arms*
+  - Will **not** automatically type convert non-boolean types to a bool
+
+- Rust has three kinds of loops: `loop`, `while`, `for`
+
+#### Loop
+- `loop` endless loop until explicit use of `break` to stop
+  - use `continue` to skip over rest of code in block for this iteration and move to next iteration
+  - `break` and `continue` by default apply to the innermost of nested loops
+    - Can use loop labels to disambiguate multiple loops: `'some_loop_label: loop {}` (notice the `'` prefix)
+      - Can affect labelled loops `break 'some_loop_label;` (notice the `'` prefix)
+- `while` loop automatically `break`s when condition is no longer `true`
+- `for` loop to execute some code for each item in a collection
+  - e.g. `for element in some_array { println!("Value is: {element}"); }`
+
