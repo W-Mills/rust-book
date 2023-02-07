@@ -77,8 +77,8 @@ let guess: u32 = guess.trim().parse().expect("Please type a number!"); // note t
 ```
 - A `match` expr is comprised of "arms", each arm has a pattern to match against and the code to run if matched
   - expr ends after first successful match
-
-## Common Programming Concepts: Rust Edition (ch. 3)
+---
+# Common Programming Concepts: Rust Edition (ch. 3)
 ### Variables
 - Variables are immutable by default, add `mut` in front of var to make it mutable => `let mut x = 123;`
   - Can't use `mut` with constants => `const x = 5;`
@@ -192,3 +192,53 @@ Function bodies are comprised of a series of statements optionally ending in an 
 - `for` loop to execute some code for each item in a collection
   - e.g. `for element in some_array { println!("Value is: {element}"); }`
 
+---
+# Ch 4: Understanding Ownership [Link to Chapter](https://doc.rust-lang.org/book/ch04-01-what-is-ownership.html)
+- Ownership is Rust's most unique feature, providing memory safety guarantees without a garbage collector
+  - A set of rules that govern how a Rust program manages memory
+
+- Stack: Values are stored (pushed) in order received and removed (popped) in reverse (last in first out)
+  - Good for data with a known size
+- Heap: Less organized, need to request space from memory allocator to get a pointer to the memory address of the location
+  - Slower for read and write, because have to allocate memory, also have to follow a pointer for reads
+
+- **Ownership Rules**:
+  - Each value in Rust has an owner
+  - There can only be one owner at a time
+  - When the owner goes out of scope, the value will be dropped
+
+- `String` type (not string literal) is mutable: `let s = String::from("hello world");`
+- `drop` function is called automatically at the closing curly brace to drop memory allocation for vars going out of scope
+- reassignment of variables results in a "move" not a shallow copy because first variable is invalidated:
+
+
+```rust
+let s1 = String::from("some string");
+let s2 = s1; // invalidates s1
+println!("{}", s1) // throws error
+
+// Pulled directly from chapter, illustrates ownership and drop behavior
+fn main() {
+    let s = String::from("hello");  // s comes into scope
+
+    takes_ownership(s);             // s's value moves into the function...
+                                    // ... and so is no longer valid here
+
+    let x = 5;                      // x comes into scope
+
+    makes_copy(x);                  // x would move into the function,
+                                    // but i32 is Copy, so it's okay to still
+                                    // use x afterward
+
+} // Here, x goes out of scope, then s. But because s's value was moved, nothing
+  // special happens.
+
+fn takes_ownership(some_string: String) { // some_string comes into scope
+    println!("{}", some_string);
+} // Here, some_string goes out of scope and `drop` is called. The backing
+  // memory is freed.
+
+fn makes_copy(some_integer: i32) { // some_integer comes into scope
+    println!("{}", some_integer);
+} // Here, some_integer goes out of scope. Nothing special happens.
+```
