@@ -358,6 +358,7 @@ let new_square = Rectangle::square(10);
 ---
 # Enums and Pattern Matching Ch.6
 - Enums allow defining a type by enumerating its possible variants
+  - A way of saying "a value is one of a possible set of values"
   - An enum value can only be one of its variants
 
 
@@ -404,3 +405,39 @@ if let Some(max) = config_max { // Only does something if matches the `Some(max)
 ```
 
 ---
+# Crates and Modules Ch. 7
+## Packages and Crates
+- Packages => A Cargo feature to build, test and share creates
+- Crates => A tree of modules that produces a library or executable
+  - The smallest amount of code that a Rust compiler considers at a time
+  - Crates can be:
+    - Binary (with a `main` func, compile to an executable) `$ /src/main.rs` by default, or `$ /src/bin/` for multiples
+    - Library (no `main`, used for shared functionality) `$ /src/lib.rs`
+## Modules
+- For grouping and reusing related code
+- All items are private to parent modules by default (use `pub` to make an item public)
+  - Making a module public with `pub mod` doesn't make its contents public => need to `pub fn` to expose the funcs
+- Modules and use => Allows controlling the organization, scope and privacy of paths
+  - `use crate::some_module::Type` to load in the type so later can refer to just `Type`
+  - `pub mod garden;` => load in the `src/garden.rs` file
+- Paths => A way of naming an item like a struct, func or module
+  - Use `::` as separators
+  - Absolute (full path starting at root)
+  - Relative (starts from current module, and uses `self`, `super` or an identifier in the current mod)
+
+## Structs and Enums
+- Can use `pub` to designate struct as public, but fields remain private
+  - Make individual fields for a struct public with `pub field_name: String,`
+  - If an enum is public, all its variants become public `pub enum Appetizer {...}`
+
+## `use` Keyword
+- `use` is like creating a symlink in the filesystem, allows avoidance of qualifying full paths to modules
+  - add `use crate::some_module::the_module` to bring `the_module` into scope as if it were defined there (still checks privacy)
+- idiomatic to `use` the parent module of a func to be used so that it must be invoked with `parent_mod::the_func` so it's clear it's not locally defined
+- idiomatic to `use` the fully qualified path to structs, enums and other items
+- `as` for aliasing duplicate names => `use std::io::Result as IoResult;`
+- `pub use` to re-export names so that calling code can bring into scope
+- Nested paths for re-using shared paths:
+  - `use std::{cmp::Ordering, io};` => brings `std:cmp::Ordering` and `std::io`into scope
+  - `use std::io::{self, Write};` => brings `std::io` and `std::io::Write`into scope
+  - `use std::collections::*;` => Glob operator brings all public items from `std::collections` into scope
