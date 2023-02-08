@@ -204,7 +204,7 @@ Function bodies are comprised of a series of statements optionally ending in an 
 
 - **Ownership Rules**:
   - Each value in Rust has an owner
-  - There can only be one owner at a time
+  - There can only be one owner at a time (assigning a value to another variable *moves* it)
   - When the owner goes out of scope, the value will be dropped
 
 - `String` type (not string literal) is mutable: `let s = String::from("hello world");`
@@ -216,29 +216,48 @@ Function bodies are comprised of a series of statements optionally ending in an 
 let s1 = String::from("some string");
 let s2 = s1; // invalidates s1
 println!("{}", s1) // throws error
-
-// Pulled directly from chapter, illustrates ownership and drop behavior
-fn main() {
-    let s = String::from("hello");  // s comes into scope
-
-    takes_ownership(s);             // s's value moves into the function...
-                                    // ... and so is no longer valid here
-
-    let x = 5;                      // x comes into scope
-
-    makes_copy(x);                  // x would move into the function,
-                                    // but i32 is Copy, so it's okay to still
-                                    // use x afterward
-
-} // Here, x goes out of scope, then s. But because s's value was moved, nothing
-  // special happens.
-
-fn takes_ownership(some_string: String) { // some_string comes into scope
-    println!("{}", some_string);
-} // Here, some_string goes out of scope and `drop` is called. The backing
-  // memory is freed.
-
-fn makes_copy(some_integer: i32) { // some_integer comes into scope
-    println!("{}", some_integer);
-} // Here, some_integer goes out of scope. Nothing special happens.
 ```
+
+### References and Borrowing
+
+- Prepending `&` in front of a type signifies a reference is passed
+  - Allows referring to a value without taking ownership of it (called *borrowing*)
+  - References are immutable by default
+  - Can create a mutable reference by declaring the initial var with `mut` and `&mut` as the reference
+    - Can't mix both `&s` immutable and `&mut s` mutable references
+  - Can either have 1 mutable reference, or limitless immutable references, but can't mix them
+  - Refernces must always be valid, or compiler will err (if reference is to a value that has been dropped)
+```rust
+fn calculate_length(s: &String) -> usize { // note &String type is immutable ref
+  s.len()
+}
+
+let mut s = String::from("hi"); // var declared as mutable
+
+change(&mut s); // mut reference passed
+
+fn change(some_string: &mut String) { // mut param declared
+  some_string.push_str(", other string");
+}
+```
+
+### The Slice Type
+
+- A slice is a kind of reference that lets you refer to a contiguous sequence of elements in a collection
+- `&str` is the type for "string slice" which is an immutable reference
+  - `fn returns_string_slice(s: &String) -> &str { ...` takes String referrence, returns a string slice
+
+```rust
+// String slice
+let s = String::from("hack days!");
+
+let slice = &s[0..4]; // "hack" => slice var s from index 0 to 3 (start index to one more than end index)
+let slice = &s[..4]; // also "hack"
+
+let slice = &s[6..11] // "days!"
+let slice = &s[6..] // also "days!"
+
+let slice = &s[..] // "hack days!" => from start index to one more than end index
+
+```
+
