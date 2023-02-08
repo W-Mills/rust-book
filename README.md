@@ -246,6 +246,8 @@ fn change(some_string: &mut String) { // mut param declared
 - A slice is a kind of reference that lets you refer to a contiguous sequence of elements in a collection
 - `&str` is the type for "string slice" which is an immutable reference
   - `fn returns_string_slice(s: &String) -> &str { ...` takes String referrence, returns a string slice
+  - Generally more flexible to use `(s: &str)` as a param, becuase can be used for `&String` and `&str` values
+- Can slice other collections like arrays more generally too
 
 ```rust
 // String slice
@@ -259,5 +261,98 @@ let slice = &s[6..] // also "days!"
 
 let slice = &s[..] // "hack days!" => from start index to one more than end index
 
+// Array slice
+let a = [1, 2, 3];
+
+let arr_slice = &a[..3]; // [1, 2]
+```
+---
+# Using Structs to Structure Related Data Ch.5
+- Struct is a custom data type that allows you to package and organize related values as named *fields* that comprise a meaningful group
+  - Methods are associated functions
+  - Can instantiate structs, use dot notation to retrieve values
+  - Use `mut` to declare mutable instance => entire struct must be mutable, can't allow mutating only specific fields
+  - Can use factory functions to build structs with default values
+
+```rust
+// Define struct with field names and types
+struct User {
+  active: bool,
+  first_name: String, // Instance owns this value
+  email: String,
+  sign_in_count: u64,
+}
+
+// Instantiation of mutable instance with concrete values
+let mut user1 = User {
+  active: true,
+  first_name: String::from("Will"),
+  email: String::from("abc@example.com"),
+  sign_in_count: 1,
+};
+
+user1.email = String::from("someotheremail@place.com"); // dot notation for field access
+
+// Factory to build user with default values
+fn build_user(email: String, first_name: String) -> User {
+  User {
+    active: true,
+    first_name, // Field init shorthand notation to use parameter value with same name
+    email,
+    sign_in_count: 1,
+  }
+}
+
+// Using struct update syntax to create a new instance spreading values from other struct (for values not explicitly set)
+let user2 = User {
+  email: String::from("newemail@example.com"),
+  ..user1 // spread must come last (will not use the value for email because it was explicitly defined above)
+};
+
 ```
 
+- Tuple Structs Without Named Fields behave like tuples
+```rust
+struct Color(i32, i32, i32); // unnamed fields because would be redundant
+
+let black = Color(0, 0, 0); //
+```
+
+## Methods
+- Similar to functions, but defined within a struct (or enum/trait object) and pirst parameter is always `self`
+  - `self` is the instance of the struct the method is being called on
+- Define a method within the context of a struct by starting an `impl` (Implement) block for the struct
+- Can define a method with the same name as one of the struct's fields which can be invoked by using `()` parenthesis
+  - e.g. `rect1.width()` for method, `rect1.width` for field value
+  - Generally used to create getter methods (not implemented automatically) => helpful for access control
+
+```rust
+struct Rectangle {
+  width: u32,
+  height: u32,
+}
+
+impl Rectangle {
+  // within impl block, `Self` is an alias for the type the block is for
+  fn area(&self) -> u32 {  // `&self` is short for `self: &Self`
+    self.width * self.height
+  }
+}
+```
+
+- All functions defined within an `impl` block are *associated functions* (associated with the type named in the `impl`)
+  - Can define non-method associated functions (don't have `self` as first param)
+  - Used like `String::from`
+```rust
+impl Rectangle {
+  fn square(size: u32) -> Self { // -> returns an instance of Rectangle with matching width and height
+    Self {
+      width: size,
+      height: size,
+    }
+  }
+}
+
+let new_square = Rectangle::square(10);
+```
+---
