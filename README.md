@@ -356,3 +356,51 @@ impl Rectangle {
 let new_square = Rectangle::square(10);
 ```
 ---
+# Enums and Pattern Matching Ch.6
+- Enums allow defining a type by enumerating its possible variants
+  - An enum value can only be one of its variants
+
+
+
+- `Option` enum expresses that a value can be something or nothing
+- Pattern matching in `match` expr for running code based on the value of an enum
+- Rust does not have a null type, instead has `Option`
+  - To use an `Option<T>`, need to handle both the `None` and `Some` cases or compiler will fail
+```rust
+enum Option<T> { // `<T>` is a Generic type, can hold any type
+  None,
+  Some(t),
+}
+```
+
+## `match` for Control Flow
+- `if` requires condition to evaluate to a boolean, but `match` can take any type
+- `match` has 'arms' that have a pattern and some code
+- Matches must be exhaustive
+- Use `other` as a catch all pattern matcher where value is used (must be last) e.g. `other => func_with_param(other)`
+  - Use `_` as a special pattern that matches any value and does not bind to it e.g  `_ => no_param_func()`
+    - Use `_ => ()` to match any value and do nothing (expr is an empty tuple)
+
+```rust
+fn plus_five(x: Option<i32>) -> Option<i32> { // Return value could be None, or a 32 bit integer
+  match x {
+    None => None, // If value is `None`, return `None`
+    Some(i) => Some(i + 5), // the `i` binds to the value contained in `Some`
+  }
+}
+
+let six = Some(6); // 6
+let eleven = plus_five(six); // 11
+let none = plus_five(None); // None
+```
+
+## `if let` Control Flow
+- Can avoid some of the boilerplate code of a match when only interested in handling code that matches one pattern and ignoring the rest:
+```rust
+let config_max = Some(3u8);
+if let Some(max) = config_max { // Only does something if matches the `Some(max) = config_max` expr
+  // do something
+}
+```
+
+---
