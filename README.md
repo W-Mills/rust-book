@@ -16,7 +16,7 @@ Notes taken from following along [The Rust Book](https://doc.rust-lang.org/book/
   - `$ cargo check` to only compile without creating an executable
   - `$ cargo run` to execute (and re-compile if files have changed)
   - `$ cargo build` to compile and create an executable
-    - `$ cargo build --release` to compile with optimizations => in arget/release`
+    - `$ cargo build --release` to compile with optimizations => in `target/release`
   - `$ cargo doc --open` to open the documentation for the code/libraries in the project in a browser (very smart!)
   - "binary crates" are executable, "library crates" can't, are intended to be used in other programs
 
@@ -441,3 +441,93 @@ if let Some(max) = config_max { // Only does something if matches the `Some(max)
   - `use std::{cmp::Ordering, io};` => brings `std:cmp::Ordering` and `std::io`into scope
   - `use std::io::{self, Write};` => brings `std::io` and `std::io::Write`into scope
   - `use std::collections::*;` => Glob operator brings all public items from `std::collections` into scope
+---
+# Common Collections Ch. 8
+
+- **Vector** for storing more than one value with all values next to each other in memory ([Link to Documentation](https://doc.rust-lang.org/std/vec/struct.Vec.html))
+  - Data is stored on the heap
+  - Can only store values of the same type
+  - Can't hold an (immutable) reference to an element and modify the vector within the same scope (violates mutable and immutable references in same scope rule)
+```rust
+let v: Vec<i32> = Vec::new();  // explicit type for empty Vector
+let v2 = vec!['a', 'b', 'c']  // implied type using `vec!` macro
+v2.push('d'); // push item into vector => ['a', 'b', 'c', 'd']
+let first = v2.get(0); // gets item at zeroth index
+let first_directly = &v[0]; // panics if outside of vector range
+
+let mut v3 = vec![1, 2, 3];
+for i in &mut v {
+  *i += 100; // use * dereference operator to get the value in `i` before mutating
+  // note: can't modify number of elements in vector within for loop
+}
+```
+
+- **Enum** to store multiple types in a Vector
+  - Create an enum with the types that might be present, then populate the vector with that single enum type
+    - The compiler will ensure each case is handled
+
+- **String** `String` or `str` (string slice)
+  - `String` is implemented as a wrapper around a vector of bytes with some differences, so many similarities in the operations available to strings and vectors
+  - Strings are UTF-8 encoded, so multibyte chars are supported
+  - **Can't** access strings via indexes e.g. `s[0]` to get first char
+    - Becuase of UTF-8 encoding, some chars are multibyte and index will not always result in a valid unicode scalar
+    - 3 ways to look at strings from Rust => bytes, scalar values, grapheme clusters (like letters)
+    - Can use byte ranges, but dangerous because might land in middle of a multi-byte char `let s = &hello[0..4];` (first 4 bytes)
+    - Best way to iterate over strings is to specify **chars()** or **bytes()**
+
+ ```rust
+let s = String::from("another string"); // `String` from string literal
+let s2 = "some string".to_string(); // working on string literal directly
+
+let mut s3 = "hello".to_string();
+s3.push_str(" world"); // => "hello world"
+
+// format! macro utilizes refernces, so s2 and s3 are still in scope
+let s4 = format!("{s2} and {s3}") // "some string and hello world"
+
+for char in "hi".chars() {
+  println!("{char}");
+}
+// => "h"
+// => "i"
+
+for byte in "hi".bytes() {
+    println!("{byte}");
+}
+// => 104
+// => 105
+ ```
+
+- **Hash Maps** `HashMap<K, V>`
+  - Keys can be any type, but all keys must be of the same type and all values must be of the same type
+  - Data is stored on the heap
+  - For types that implement the `Copy` trait like `i32`, values are copied into hash map
+  - For owned values like `String`, the values will be moved and the hash map will become the owner of the values
+  - Can use `entry()` to retrieve a value for a key
+
+```rust
+use std::collections::HashMap;
+
+let mut scores = HashMap::new();
+
+scores.insert(String::from("Blue"), 10);
+scores.insert(String::from("Yellow"), 20);
+scores.insert(String::from("Yellow"), 30); // will overwrite previous value for "Yellow" key
+
+let team_name = String::from("Blue");
+// handle option by using copied() to get an Option<i32> instead of Option<&i32>
+// `unwrap_or` to set score of 0 if no entry in hashmap for key
+let score = scores.get(&team_name).copied().unwrap_or(0);
+
+println!("Blue team score: {score}"); // Blue team score: 10
+
+for (key, value) in &scores {
+    println!("{key}: {value}"); // prints in arbitrary order
+}
+
+println!("{:?}", scores); // {"Blue": 10, "Yellow": 30}
+
+scores.entry(String::from("Green")).or_insert(100); // either take score for key "Green", or insert 100
+```
+
+
