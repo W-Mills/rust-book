@@ -578,7 +578,7 @@ fn some_func() -> Result<String, io::Error> {
 - Functions have contracts: behaviour is only guaranteed if the inputs meet requirements => panic when contract is violated
   - Rely on type system to avoid excess handling
 
-
+---
 # Generic Types, Traits and Lifetimes: Ch.10
 - **generics**: abstract stand-ins for concrete types or other properties
   - Functions can take params of generic types
@@ -689,6 +689,26 @@ fn longest<'a>(x: &'a str, y: &'a str) -> &'a str { // the returned reference wi
 // Lifetime declared as part of struct definition
 struct Excerpt<'a> { // an instance of Excerpt can't outlive the reference it holds in its `part` field
   part: &'a str,
+}
+```
+---
+# Writing Automated Tests: Ch.11
+- Setup, run code under test, assert results are what's expected
+- A Rust test is essentially a function that's annotated with the `test` attribute
+- Run tests with `$ cargo test`, each test is run in a new thread
+- use `#[should_panic(expected = "some expected panic message")]` attribute above test to assert that panic occured in test code
+
+```rust
+#[cfg(test)]
+mod tests {
+  use super::*; // to bring code under test defined in outer module into the scope of inner `tests` module
+
+  #[test] // annotation attribute indicates that below it is a test fn
+  fn it_works() {
+    let result = 5 + 5;
+    assert_eq!(result, 10) // assert_eq! is a macro from std lib
+    assert_ne!(result, 11) // assert not equal
+  }
 }
 ```
 
