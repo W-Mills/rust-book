@@ -4,6 +4,13 @@ Exercises while going through official book from [doc.rust-lang.org](https://doc
 
 Notes taken from following along [The Rust Book](https://doc.rust-lang.org/book/title-page.html)
 
+# Additional Resources Not Covered Here
+- [Rustlings](https://github.com/rust-lang/rustlings) - Small exercises to solve in Rust
+
+Shopify Repositories Using Rust In Production:
+- [api-gateway](https://github.com/Shopify/api-gateway)
+- [shadowenv](https://github.com/Shopify/shadowenv)
+
 # Basics
 - `rustup` is a CLI tool for managing Rust versions
   - `rustc --version` to check if rust is installed correctly
@@ -531,6 +538,35 @@ scores.entry(String::from("Green")).or_insert(100); // either take score for key
 ```
 ---
 # Error Handling Ch.9
-- Two major error categories:
+- Rust does not have exceptions, it has two major error categories:
   - Recoverable => `Result<T, E>` type
-  - Unrecoverable => symptom of bug, calls `panic!`
+  - Unrecoverable => symptom of bug, calls `panic!` macro
+
+### Unrecoverable
+- `panic!` => Default: print failure message, unwind, clean up stack and quit
+  - Can configure to immediately abort instead and let the OS clean up the memory (unwind/clean up is expensive)
+  - `[profile.release] panic = 'abort'`
+  - set `$ RUST_BACKTRACE=1 cargo run` to print out the backtrace
+
+### Recoverable
+- `<T>` and `<E>` are generic types
+  - `<T>` returned in success case with `Ok` variant
+  - `<E>` returned in failure case with `Err` variant
+- Can use `unrwrap_or_else` method to condense logic instead of using `match` and handling `Err`
+- `unwrap` method provides shorthand where if the `Result` value is `Ok`, will return the value inside `Ok`, but if it's an `Err` variant will call the `panic!` macro
+  - `expect` method is similar to `unwrap`, but allows setting a custom error message
+- Propogate errors by returning the error to the calling code `Err(e) => return Err(e)`
+  - `?` operator as a shortcut to propogate errors `File::open("some.txt")?;` (note the `?` after the Result)
+    - `?` passes through the `from` function, so can convert the error returned to a custom Err
+    - Can chain method calls after `?` to lessen boilerplate code
+    - Can only use `?` where return type is compatible (i.e. a `Result` type)
+```rust
+enum Result<T, E> {
+  Ok(T),
+  Err(E),
+}
+
+fn some_func() -> Result<String, io::Error> {
+  let mut some_file = File::open("file.txt")?; // note the `?` where a Result is returned
+}
+```
