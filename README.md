@@ -85,7 +85,7 @@ let guess: u32 = guess.trim().parse().expect("Please type a number!"); // note t
 - A `match` expr is comprised of "arms", each arm has a pattern to match against and the code to run if matched
   - expr ends after first successful match
 ---
-# Common Programming Concepts: Rust Edition (ch. 3)
+# Common Programming Concepts: Rust Edition: Ch.3
 ### Variables
 - Variables are immutable by default, add `mut` in front of var to make it mutable => `let mut x = 123;`
   - Can't use `mut` with constants => `const x = 5;`
@@ -200,7 +200,7 @@ Function bodies are comprised of a series of statements optionally ending in an 
   - e.g. `for element in some_array { println!("Value is: {element}"); }`
 
 ---
-# Ch 4: Understanding Ownership [Link to Chapter](https://doc.rust-lang.org/book/ch04-01-what-is-ownership.html)
+# Understanding Ownership: [Ch 4](https://doc.rust-lang.org/book/ch04-01-what-is-ownership.html)
 - Ownership is Rust's most unique feature, providing memory safety guarantees without a garbage collector
   - A set of rules that govern how a Rust program manages memory
 
@@ -274,7 +274,7 @@ let a = [1, 2, 3];
 let arr_slice = &a[..3]; // [1, 2]
 ```
 ---
-# Using Structs to Structure Related Data Ch.5
+# Using Structs to Structure Related Data: Ch.5
 - Struct is a custom data type that allows you to package and organize related values as named *fields* that comprise a meaningful group
   - Methods are associated functions
   - Can instantiate structs, use dot notation to retrieve values
@@ -363,7 +363,7 @@ impl Rectangle {
 let new_square = Rectangle::square(10);
 ```
 ---
-# Enums and Pattern Matching Ch.6
+# Enums and Pattern Matching: Ch.6
 - Enums allow defining a type by enumerating its possible variants
   - A way of saying "a value is one of a possible set of values"
   - An enum value can only be one of its variants
@@ -412,7 +412,7 @@ if let Some(max) = config_max { // Only does something if matches the `Some(max)
 ```
 
 ---
-# Crates and Modules Ch. 7
+# Crates and Modules: Ch. 7
 ## Packages and Crates
 - Packages => A Cargo feature to build, test and share creates
 - Crates => A tree of modules that produces a library or executable
@@ -449,7 +449,7 @@ if let Some(max) = config_max { // Only does something if matches the `Some(max)
   - `use std::io::{self, Write};` => brings `std::io` and `std::io::Write`into scope
   - `use std::collections::*;` => Glob operator brings all public items from `std::collections` into scope
 ---
-# Common Collections Ch. 8
+# Common Collections: Ch. 8
 
 - **Vector** for storing more than one value with all values next to each other in memory ([Link to Documentation](https://doc.rust-lang.org/std/vec/struct.Vec.html))
   - Data is stored on the heap
@@ -537,7 +537,7 @@ println!("{:?}", scores); // {"Blue": 10, "Yellow": 30}
 scores.entry(String::from("Green")).or_insert(100); // either take score for key "Green", or insert 100
 ```
 ---
-# Error Handling Ch.9
+# Error Handling: Ch.9
 - Rust does not have exceptions, it has two major error categories:
   - Recoverable => `Result<T, E>` type
   - Unrecoverable => symptom of bug, calls `panic!` macro
@@ -559,7 +559,7 @@ scores.entry(String::from("Green")).or_insert(100); // either take score for key
   - `?` operator as a shortcut to propogate errors `File::open("some.txt")?;` (note the `?` after the Result)
     - `?` passes through the `from` function, so can convert the error returned to a custom Err
     - Can chain method calls after `?` to lessen boilerplate code
-    - Can only use `?` where return type is compatible (i.e. a `Result` type)
+    - Can only use `?` where return type is compatible (i.e. a `Result`, `Option` type, or implements `FromResidual`)
 ```rust
 enum Result<T, E> {
   Ok(T),
@@ -570,3 +570,126 @@ fn some_func() -> Result<String, io::Error> {
   let mut some_file = File::open("file.txt")?; // note the `?` where a Result is returned
 }
 ```
+### Deciding to `panic! or Not
+- `panic!` in tests, prototype code, code examples
+- use `unwrap` or `expect` when hardcoding means a result will always be ok, but compiler won't be able to tell
+- `panic!` when code gets into a bad state from unexpected value
+- return a `Result` when failure is an expected possibility
+- Functions have contracts: behaviour is only guaranteed if the inputs meet requirements => panic when contract is violated
+  - Rely on type system to avoid excess handling
+
+
+# Generic Types, Traits and Lifetimes: Ch.10
+- **generics**: abstract stand-ins for concrete types or other properties
+  - Functions can take params of generic types
+- Use **traits** to define behavior in a generic way
+  - Combine traits + generics to constrain generic types to only accept types with specified behaviors
+- **lifetimes**: a variety of generics that tell the compiler how references relate to each other
+  - So compiler can know enough about borrowed values to ensure refs will be valid in more situations
+
+### Generic Data Types
+  - Use generic types to de-duplicate logic by extracting to a function with generic parameters
+  - by convention, generic type parameter for a function is `<T>`
+  - No runtime cost to using generic types, compiler converts to concrete types (process called *monomorphization*)
+
+```rust
+// "the function largest is generic over some type `T`
+fn largest<T>(list: &[T]) -> &T {...}` // accepts reference to a slice of values of generic type `<T>`
+
+// works for structs too
+struct Point<T> {
+  x: T,
+  y: T, // x and y are of generic type, but must be of the same type T
+}
+
+struct Point<T, U> { // defining two generics allows x and y to mix/match between two types
+  x: T,
+  y: U,
+}
+
+// Works to hold generic types in enum variants too
+enum Option<T> {
+  Some(T), // some holds value for a generic (any) type
+  None, // holds no value
+}
+
+enum Result<T, E> { // holds multiple generics, T and E
+  Ok(T),
+  Err(E),
+}
+```
+### Traits: Defining Shared Behavior
+- **trait** defines functionality that a type has and can share with other types
+  - Used to share behavior in an abstract way
+  - Use **trait bounds** to specify that a generic type can be any that has a certain trait behavior
+  - need to bring trait into scope to use => `use aggregator::{Summary, Tweet};`
+  - Can't implement traits on external traits on external types (*orphan rule*)
+
+```rust
+pub trait Summary { // declare trait with name
+  fn summarize(&self) -> String; // note semi-colon, each type implementing this trait must have a method with this exact signature defined
+}
+
+impl Summary for NewsArticle { // note `for`
+  fn summarize(&self) -> String { // ...some implementation for NewsArticle }
+}
+
+impl Summary for Tweet {
+  fn summarize(&self) -> String { // ... some implmentation for Tweet}
+}
+```
+
+Can also define default implmentations
+```rust
+pub trait Summary {
+  fn summarize(&self) -> String { // default implmentation in block
+    String::from("(Read more...)")
+  }
+}
+
+// can define functions that accept types with traits
+pub fn notify(item: &impl Summary) { // accepts any type that implements the `Summary` trait
+  println!("Breaking news! {}", item.summarize()); // calls method from Summary trait
+}
+
+// Trait bound syntax forces multiple traits to conform to same trait
+pub fn notify<T: Summary>(item1: &T, item2: &T) {
+
+// Multiple trait bounds to enforce implementations of multiple traits with `+`
+pub fn notify<T: Summary + Display>(item: &T) { // accepts types that implement both Summary and Display traits
+
+// Can return types that implement traits in method return definition (as long as only returning a single type)
+fn returns_summarizable() -> impl Summary { // return value is guaranteed to implement the Summary trait
+```
+
+### Validating References with Lifetimes
+- Lifetimes are another type of generic that ensure references are valid as long as they're needed to be
+  - Every reference has a lifetime => the scope where that reference is valid
+  - Their goal is to prevent dangling references
+  - Generally lifetimes are implicit and inferred, but must be annotated when the lifetimes of references could be related in multiple ways
+  - Annotating lifetimes is a concept that it pretty unique to Rust
+
+
+- Lifetime annontation syntax describe the relationships of the lifetimes of multiple references to each other
+  - names of lifetime parameters must start with an apostrophe `'`, and are lowercased and short
+  - The lifetime of the reference returned is the same as the smaller of the lifetimes of the references passed in
+    - i.e. they both go out of scope when the smaller lifetime goes out of scope
+    - Lifetime Elision rules allow the compiler to sometimes generate lifetimes implicitly to avoid boilerplate code
+  - `'static` lifetime denotes that the reference can live for the entire duration of the program
+
+```rust
+fn longest<'a>(x: &'a str, y: &'a str) -> &'a str { // the returned reference will be valid as long as both params are valid (share lifetime 'a)
+  if x.len() > y.len() {
+    x
+  } else {
+    y
+  }
+}
+
+// Lifetime declared as part of struct definition
+struct Excerpt<'a> { // an instance of Excerpt can't outlive the reference it holds in its `part` field
+  part: &'a str,
+}
+```
+
+
