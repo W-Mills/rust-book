@@ -697,9 +697,11 @@ struct Excerpt<'a> { // an instance of Excerpt can't outlive the reference it ho
 - A Rust test is essentially a function that's annotated with the `test` attribute
 - Run tests with `$ cargo test`, each test is run in a new thread
 - use `#[should_panic(expected = "some expected panic message")]` attribute above test to assert that panic occured in test code
+- Write unit tests in the `/src` dir directly in the file with the code it's testing (conventionally within a `mod tests`)
+
 
 ```rust
-#[cfg(test)]
+#[cfg(test)] // tells cargo to compile and run the code only when running `$ cargo test` but ignore when running `$ cargo build`
 mod tests {
   use super::*; // to bring code under test defined in outer module into the scope of inner `tests` module
 
