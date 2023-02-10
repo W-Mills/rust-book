@@ -62,11 +62,10 @@ fn main() {
                 }
                 let suffix = format!("-{first_char}ay");
                 piggied.push_str(&suffix.to_string());
-                pig_latin.push_str(&piggied);
             } else { // is vowel
-                let piggied = format!(" {word}-hay");
-                pig_latin.push_str(&piggied.to_string());
+                piggied = format!(" {word}-hay");
             }
+            pig_latin.push_str(&piggied);
         }
 
         println!("{}", pig_latin.trim());

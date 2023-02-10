@@ -529,5 +529,8 @@ println!("{:?}", scores); // {"Blue": 10, "Yellow": 30}
 
 scores.entry(String::from("Green")).or_insert(100); // either take score for key "Green", or insert 100
 ```
-
-
+---
+# Error Handling Ch.9
+- Two major error categories:
+  - Recoverable => `Result<T, E>` type
+  - Unrecoverable => symptom of bug, calls `panic!`
